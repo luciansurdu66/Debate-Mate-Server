@@ -6,6 +6,7 @@ const {
     upload,
     createDebater,
     deleteDebater,
+    getDebater,
 } = require("../controllers/debaterController");
 
 // Route to import debaters from Excel
@@ -17,5 +18,7 @@ router.get("/", getDebaters);
 router.post("/", createDebater);
 
 router.delete("/:id", deleteDebater);
+
+router.get("/:id", getDebater);
 
 module.exports = router;

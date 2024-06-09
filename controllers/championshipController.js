@@ -1,6 +1,7 @@
 const Championship = require("../models/championship");
 const Round = require("../models/round");
 const Match = require("../models/match");
+const Adjudicator = require("../models/adjudicator");
 
 const getChampionships = async (req, res) => {
     try {
@@ -24,19 +25,41 @@ const getChampionship = async (req, res) => {
     }
 };
 
+function shuffleArray(array) {
+    for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+    }
+    return array;
+}
+
 const createChampionship = async (req, res) => {
     const { name, rounds, teams } = req.body;
     try {
         const championship = await Championship.create({ name, rounds });
-        // Ensure there's an even number of teams
         const teamsToUse = teams.length % 2 === 0 ? teams : teams.slice(0, -1);
+        const adjudicators = await Adjudicator.findAll();
         for (let i = 1; i <= rounds; i++) {
-            const round = await Round.create({ championshipId: championship.id, number: i });
-            // Create matches for each pair of teams
-            for (let j = 0; j < teamsToUse.length; j += 2) {
-                const team1 = teamsToUse[j];
-                const team2 = teamsToUse[j + 1];
-                await Match.create({ championshipId: championship.id, roundNumber: i, governmentTeamId: team1.id, oppositionTeamId: team2.id});
+            const round = await Round.create({
+                championshipId: championship.id,
+                number: i,
+            });
+
+            const shuffledTeams = shuffleArray([...teamsToUse]);
+            for (let j = 0; j < shuffledTeams.length; j += 2) {
+                const team1 = shuffledTeams[j];
+                const team2 = shuffledTeams[j + 1];
+                const randomIndex = Math.floor(
+                    Math.random() * adjudicators.length
+                );
+                const randomAdjudicator = adjudicators[randomIndex];
+                const match = await Match.create({
+                    championshipId: championship.id,
+                    roundNumber: i,
+                    governmentTeamId: team1.id,
+                    oppositionTeamId: team2.id,
+                    adjudicatorId: randomAdjudicator.id,
+                });
             }
         }
         res.json(championship);
@@ -76,15 +99,14 @@ const deleteChampionship = async (req, res) => {
     }
 };
 
-
 const getRoundData = async (req, res) => {
     try {
         const { championshipId, roundNumber } = req.params;
-        const matches = await Match.findAll({ 
-            where: { 
-                championshipId: championshipId, 
-                roundNumber: roundNumber 
-            } 
+        const matches = await Match.findAll({
+            where: {
+                championshipId: championshipId,
+                roundNumber: roundNumber,
+            },
         });
         res.json(matches);
     } catch (error) {

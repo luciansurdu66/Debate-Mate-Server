@@ -1,22 +1,24 @@
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
-const { User } = require("../models/user");
+const User = require("../models/user");
 
 const secret = "mysecret";
 
 const register = async (req, res) => {
-    const { username, email, password } = req.body;
+    const { email, password } = req.body;
+
+    const existingUser = await User.findOne({ where: { email } });
+
+    if (existingUser) {
+        return res.status(400).json({ error: "Email already exists" });
+    }
     try {
         const salt = await bcrypt.genSalt(10);
         const hashedPassword = await bcrypt.hash(password, salt);
 
-        const userRole = role === "admin" ? "admin" : "user";
-
         const user = await User.create({
-            username,
             email,
             password: hashedPassword,
-            role: userRole,
         });
         res.json(user);
     } catch (error) {
@@ -25,9 +27,10 @@ const register = async (req, res) => {
 };
 
 const login = async (req, res) => {
-    const { username, password } = req.body;
+    const { email, password } = req.body;
+    console.log(req.body);
     try {
-        const user = await User.findOne({ where: { username } });
+        const user = await User.findOne({ where: { email } });
         if (!user) {
             return res.status(400).json({ error: "User not found" });
         }
@@ -39,8 +42,7 @@ const login = async (req, res) => {
 
         const payload = {
             id: user.id,
-            username: user.username,
-            role: user.role,
+            email: user.email,
         };
 
         const token = jwt.sign(payload, secret, { expiresIn: "1h" });

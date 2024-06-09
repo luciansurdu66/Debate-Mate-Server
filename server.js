@@ -8,7 +8,7 @@ const teamRoutes = require('./routes/team');
 const matchRoutes = require('./routes/match');
 const championshipRoutes = require('./routes/championship');
 const roundsRoutes = require('./routes/round')
-
+const motionRoutes = require('./routes/motion')
 const app = express();
 app.use(cors());
 app.use(express.json());
@@ -20,6 +20,7 @@ app.use('/api/teams', teamRoutes);
 app.use('/api/matches', matchRoutes);
 app.use('/api/championships', championshipRoutes);
 app.use('/api/rounds', roundsRoutes);
+app.use('/api/motions', motionRoutes);
 const PORT = process.env.PORT || 5000;
 
 sequelize.sync().then(() => {

@@ -1,43 +1,55 @@
 const { DataTypes } = require("sequelize");
 const sequelize = require("../db");
 
-const Match = sequelize.define("match", {
-    championshipId: {
+const Score = sequelize.define("score", {
+    championshipId:{
         type: DataTypes.INTEGER,
+        allowNull: false,
         references: {
             model: "championships",
             key: "id",
         },
-        allowNull: false,
     },
     roundNumber: {
         type: DataTypes.INTEGER,
-        allowNull: false,
+        
     },
-    governmentTeamId: {
+    matchId: {
         type: DataTypes.INTEGER,
+        allowNull: false,
+        references: {
+            model: "matches",
+            key: "id",
+        },
+    },
+    teamId: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
         references: {
             model: "teams",
             key: "id",
         },
-        allowNull: false,
     },
-    oppositionTeamId: {
+    debaterId: {
         type: DataTypes.INTEGER,
+        allowNull: false,
         references: {
-            model: "teams",
+            model: "debaters",
             key: "id",
         },
-        allowNull: false,
     },
     adjudicatorId: {
         type: DataTypes.INTEGER,
+        allowNull: false,
         references: {
             model: "adjudicators",
             key: "id",
         },
+    },
+    score: {
+        type: DataTypes.INTEGER,
         allowNull: false,
-    }
+    },
 });
 
-module.exports = Match;
+module.exports = Score;

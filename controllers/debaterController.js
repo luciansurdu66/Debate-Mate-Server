@@ -44,6 +44,23 @@ const getDebaters = async (req, res) => {
     }
 };
 
+const getDebater = async (req, res) => {
+    const { id } = req.params;
+    try {
+        const debater = await Debater.findOne({ where: { id } });
+        if (!debater) {
+            return res.status(404).json({ error: "Debater not found" });
+        }
+        res.json(debater);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({
+            success: false,
+            message: "Failed to get debater",
+        });
+    }
+}
+
 const createDebater = async (req, res) => {
     const { name, club, team, score } = req.body;
     try {
@@ -81,4 +98,5 @@ module.exports = {
     upload,
     createDebater,
     deleteDebater,
+    getDebater,
 };
